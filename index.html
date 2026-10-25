@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURORA QUANTUM OS — School Management & ERP</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body id="appBody">
+  <div class="bg-overlay"></div>
+
+  <!-- FULL-SCREEN INTRO, FIRST-TIME SETUP, NAMED LOGIN & EMAIL/PHONE OTP RECOVERY -->
+  <div class="intro-screen" id="introScreen">
+    <div class="intro-backdrop"></div>
+    <div class="intro-card">
+      <img id="introLogoImg" class="intro-logo" src="" alt="School Crest">
+      <div><span class="intro-badge" id="liveIntroClock">STRIVE TO SHINE • TRUSTABLE SECURITY</span></div>
+      <h1 class="intro-title" id="introSchoolName">MY OWN SCHOOL MAIN CAMPUS</h1>
+      <p class="intro-tagline" id="introSchoolTagline">Campus Management, Bank Payroll, Utilities & Accounting</p>
+
+      <!-- BOX 1: FIRST-TIME PRINCIPAL SETUP + LINK ADMIN EMAIL & PHONE -->
+      <div class="login-box" id="firstTimeSetupBox" style="display:none;">
+        <div style="color:var(--neon-cyan);font-size:0.8rem;font-weight:800;margin-bottom:8px;">
+          INITIAL SECURITY SETUP — CREATE LOGIN NAMES & LINK RECOVERY EMAIL / PHONE
+        </div>
+        <div class="login-grid">
+          <div class="full">
+            <label>Your School Full Name *</label>
+            <input type="text" id="initSchoolName" value="EDUCORE INTERNATIONAL CAMPUS">
+          </div>
+          <div>
+            <label>Principal Login Username *</label>
+            <input type="text" id="initAdminUser" placeholder="e.g. principal_ali">
+          </div>
+          <div>
+            <label>Principal Password *</label>
+            <input type="password" id="initAdminPass" placeholder="Create strong password">
+          </div>
+          <div>
+            <label>Cashier Login Username *</label>
+            <input type="text" id="initCashierUser" placeholder="e.g. cashier_usman">
+          </div>
+          <div>
+            <label>Cashier Password *</label>
+            <input type="password" id="initCashierPass" placeholder="Create cashier password">
+          </div>
+          <div>
+            <label>Linked Admin Recovery Email *</label>
+            <input type="email" id="initRecEmail" placeholder="yourname@gmail.com">
+          </div>
+          <div>
+            <label>Linked Admin WhatsApp / Phone *</label>
+            <input type="text" id="initRecPhone" placeholder="0300-1234567">
+          </div>
+          <div class="full">
+            <label>Master Emergency Recovery Secret Phrase / Key *</label>
+            <input type="text" id="initMasterKey" placeholder="e.g. MySchoolSecret2026 (Backup offline recovery key)">
+          </div>
+        </div>
+        <button class="btn-cyber" onclick="completeFirstTimeSetup()">LINK EMAIL/PHONE & INITIALIZE SECURE SYSTEM</button>
+      </div>
+
+      <!-- BOX 2: STANDARD NAMED USER + PASSWORD LOGIN -->
+      <div class="login-box" id="standardLoginBox" style="display:none;">
+        <div class="login-grid">
+          <div class="full">
+            <label>Select Portal Role</label>
+            <select id="loginRole">
+              <option value="Principal">Principal / System Administrator</option>
+              <option value="Accountant">Accountant / Fee Cashier</option>
+              <option value="Teacher">Teacher (My Salary & Bank Portal)</option>
+            </select>
+          </div>
+          <div>
+            <label>Assigned Username</label>
+            <input type="text" id="loginUsername" placeholder="Enter your username" autocomplete="off">
+          </div>
+          <div>
+            <label>Personal Password</label>
+            <input type="password" id="loginPassword" placeholder="Enter password" autocomplete="off" onkeydown="if(event.key==='Enter') attemptLogin()">
+          </div>
+        </div>
+        <button class="btn-cyber" onclick="attemptLogin()">AUTHENTICATE & UNLOCK WORKSPACE</button>
+        <div id="loginErrorMsg" style="color:#fb7185;font-size:0.77rem;font-weight:700;margin-top:8px;display:none;"></div>
+        <div style="text-align:center;">
+          <span class="forgot-link" onclick="openForgotRecoveryBox()">Forgot Username or Password? Send Recovery Code to Linked Email / Phone</span>
+        </div>
+      </div>
+
+      <!-- BOX 3: FORGOT PASSWORD / OTP RECOVERY VIA LINKED EMAIL & PHONE -->
+      <div class="login-box" id="forgotRecoveryBox" style="display:none;">
+        <div style="color:var(--neon-cyan);font-size:0.82rem;font-weight:800;margin-bottom:6px;">
+          ACCOUNT RECOVERY — LINKED EMAIL & PHONE OTP VERIFICATION
+        </div>
+        <p style="font-size:0.75rem;color:#cbd5e1;margin-bottom:10px;line-height:1.4;" id="recoveryTargetInfo">
+          Linked Security Contact: Checking...
+        </p>
+
+        <div class="login-grid">
+          <div class="full">
+            <label>Which Account Needs Password Reset?</label>
+            <select id="recTargetRole">
+              <option value="Principal">Principal / Admin Account</option>
+              <option value="Accountant">Accountant / Cashier Account</option>
+              <option value="Teacher">Teacher Account (Enter Teacher Username Below)</option>
+            </select>
+          </div>
+          <div class="full">
+            <label>Step 1: Dispatch 6-Digit Security Code to Your Linked Contact</label>
+            <div style="display:flex;gap:6px;flex-wrap:wrap;">
+              <button type="button" class="btn btn-wa" style="flex:1;justify-content:center;" onclick="dispatchOTP('whatsapp')">Send OTP to Linked WhatsApp / Phone</button>
+              <button type="button" class="btn btn-primary" style="flex:1;justify-content:center;" onclick="dispatchOTP('email')">Send OTP to Linked Email</button>
+            </div>
+            <div id="otpDispatchStatus" style="font-size:0.74rem;color:#34d399;margin-top:5px;display:none;"></div>
+          </div>
+          <div>
+            <label>Enter 6-Digit OTP (Or Master Key) *</label>
+            <input type="text" id="recOtpInput" placeholder="6-digit OTP or Master Key">
+          </div>
+          <div>
+            <label>Target Username (New or Existing) *</label>
+            <input type="text" id="recNewUsername" placeholder="e.g. principal_ali">
+          </div>
+          <div class="full">
+            <label>Set New Password *</label>
+            <input type="password" id="recNewPassword" placeholder="Enter new strong password">
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <button class="btn btn-outline" style="flex:1;justify-content:center;" onclick="closeForgotRecoveryBox()">&larr; Back to Login</button>
+          <button class="btn-cyber" style="flex:2;" onclick="verifyOTPAndResetPassword()">VERIFY CODE & RESET PASSWORD</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- COLLAPSIBLE SIDE TASKBAR -->
+  <aside class="sidebar" id="mainSidebar">
+    <div class="sidebar-top">
+      <button class="menu-toggle-btn" onclick="toggleSidebar()" title="Open / Close Side Taskbar">&#9776;</button>
+      <div class="brand-info">
+        <img id="sideLogoImg" src="" alt="Logo">
+        <div class="brand-text">
+          <div class="t1" id="sideSchoolName">My Own School</div>
+          <div class="t2" id="activeRoleBadge">USER: PRINCIPAL</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SIDEBAR QUICK COMMAND DOCK -->
+    <div class="sidebar-cmd-dock" id="sidebarCommandDock">
+      <div class="section-caption">Quick Commands</div>
+      <button class="cmd-btn primary finance-only" onclick="openStudentModal()" title="New Student Admission">
+        <i class="cmd-icon">+</i><span class="cmd-label">New Student Admission</span>
+      </button>
+      <button class="cmd-btn in finance-only" onclick="openCashModal('IN')" title="Record Cash In (Income)">
+        <i class="cmd-icon">&uarr;</i><span class="cmd-label">Record Cash In (Income)</span>
+      </button>
+      <button class="cmd-btn out finance-only" onclick="openCashModal('OUT')" title="Record Cash Out (Expense)">
+        <i class="cmd-icon">&darr;</i><span class="cmd-label">Record Cash Out (Expense)</span>
+      </button>
+      <button class="cmd-btn util finance-only" onclick="openUtilityModal()" title="Add Electricity / Gas / WiFi Bill">
+        <i class="cmd-icon">&#9889;</i><span class="cmd-label">Add Utility Bill</span>
+      </button>
+      <button class="cmd-btn" onclick="togglePrivacyBlur()" title="Blur / Show Sensitive Numbers">
+        <i class="cmd-icon">&#128065;</i><span class="cmd-label" id="sidePrivacyLabel">Blur: OFF</span>
+      </button>
+      <button class="cmd-btn admin-only" onclick="openBrandingModal()" title="School Pic, Bank, Login Names & Linked Email/Phone">
+        <i class="cmd-icon">&#9881;</i><span class="cmd-label">School, Logins & Email</span>
+      </button>
+    </div>
+
+    <!-- SIDEBAR NAVIGATION -->
+    <ul class="nav">
+      <div class="section-caption" style="margin:4px 0;">Modules</div>
+      <li id="nav-dashboard" class="active finance-only" onclick="switchTab('dashboard', this)" title="Command Center">
+        <span class="nav-icon">01</span><span class="nav-label">Command Center</span>
+      </li>
+      <li id="nav-family" class="finance-only" onclick="switchTab('family', this)" title="Father CNIC Family Tree">
+        <span class="nav-icon">02</span><span class="nav-label">Father CNIC Family Tree</span>
+      </li>
+      <li id="nav-students" class="finance-only" onclick="switchTab('students', this)" title="Students, Photos & SLC">
+        <span class="nav-icon">03</span><span class="nav-label">Students, Photos & SLC</span>
+      </li>
+      <li id="nav-fees" class="finance-only" onclick="switchTab('fees', this)" title="Tapsol Challans & POS">
+        <span class="nav-icon">04</span><span class="nav-label">Tapsol Challans & POS</span>
+      </li>
+      <li id="nav-cashbook" class="finance-only" onclick="switchTab('cashbook', this)" title="Cash In / Cash Out Ledger">
+        <span class="nav-icon">05</span><span class="nav-label">Cash In / Cash Out Ledger</span>
+      </li>
+      <li id="nav-payroll" class="finance-only" onclick="switchTab('payroll', this)" title="Staff Payroll & Bank IBANs">
+        <span class="nav-icon">06</span><span class="nav-label">Staff Payroll & Bank IBAN</span>
+      </li>
+      <li id="nav-teacherportal" onclick="switchTab('teacherportal', this)" title="My Teacher Salary & Bank Portal">
+        <span class="nav-icon">07</span><span class="nav-label">Teacher Salary Lookup</span>
+      </li>
+      <li id="nav-utilities" class="finance-only" onclick="switchTab('utilities', this)" title="Electricity, Gas & WiFi Bills">
+        <span class="nav-icon">08</span><span class="nav-label">Elec, Gas & WiFi Bills</span>
+      </li>
+      <li id="nav-attendance" class="finance-only" onclick="switchTab('attendance', this)" title="Daily Attendance">
+        <span class="nav-icon">09</span><span class="nav-label">Daily Attendance</span>
+      </li>
+      <li id="nav-exams" class="finance-only" onclick="switchTab('exams', this)" title="Exams & Result Cards">
+        <span class="nav-icon">10</span><span class="nav-label">Exams & Result Cards</span>
+      </li>
+      <li id="nav-backup" class="admin-only" onclick="switchTab('backup', this)" title="Backup, Audit Log & Wipe Security">
+        <span class="nav-icon">11</span><span class="nav-label">Backup, Audit & Wipe</span>
+      </li>
+    </ul>
+
+    <div class="sidebar-footer">
+      <button class="btn btn-danger btn-sm" onclick="lockSession()" style="width:100%;justify-content:center;" title="Lock Session">
+        <span>&#128274;</span><span class="cmd-label">Lock Terminal</span>
+      </button>
+    </div>
+  </aside>
+
+  <!-- MAIN WORKSPACE -->
+  <div class="main">
+    <header class="topbar">
+      <h2 id="pageTitle">Command Center & Executive Analytics</h2>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <span class="security-pill" id="linkedSecurityPill">Linked Security Active</span>
+        <span class="security-pill" id="sessionUserPill">Authenticated</span>
+      </div>
+    </header>
+
+    <main class="content">
+      <!-- 1. DASHBOARD -->
+      <section id="view-dashboard" class="view-section active">
+        <div class="school-hero" id="dashboardHeroBanner">
+          <div class="school-hero-left">
+            <img id="heroLogoImg" class="school-hero-logo" src="" alt="School Logo">
+            <div>
+              <div style="font-size:0.7rem;color:var(--neon-cyan);font-weight:700;letter-spacing:0.8px;" id="heroRoleGreeting">AUTHENTICATED SESSION</div>
+              <h2 id="heroSchoolName" style="font-size:1.38rem;font-weight:800;color:#fff;margin:2px 0;">MY OWN SCHOOL</h2>
+              <div id="heroSchoolTagline" style="font-size:0.8rem;color:#cbd5e1;">Main Campus | Bank: HBL A/C # 0042-79001234-03</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="label">Enrolled Students</div>
+            <div class="val" id="dTotalStu">0</div>
+            <div class="sub" id="dTotalFam">0 Families (CNICs)</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Total Cash In (Income)</div>
+            <div class="val sensitive-val" id="dCashIn" style="color:#34d399;">Rs 0</div>
+            <div class="sub">Fee Receipts + Other Income</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Total Cash Out</div>
+            <div class="val sensitive-val" id="dCashOut" style="color:#fb7185;">Rs 0</div>
+            <div class="sub">Salaries + Elec/Gas/WiFi + Expenses</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Net Cash In Hand</div>
+            <div class="val sensitive-val" id="dNetCash">Rs 0</div>
+            <div class="sub">Cash In minus Cash Out</div>
+          </div>
+          <div class="stat-card">
+            <div class="label">Unpaid Utility Bills</div>
+            <div class="val sensitive-val" id="dPendingUtil" style="color:#fbbf24;">Rs 0</div>
+            <div class="sub" id="dPendingFeeSub">Fee Dues: Rs 0</div>
+          </div>
+        </div>
+
+        <!-- LIVE VISUAL ANALYTICS BARS -->
+        <div class="analytics-strip">
+          <div class="stat-card">
+            <div style="display:flex;justify-content:space-between;font-size:0.78rem;font-weight:700;">
+              <span>FEE COLLECTION RECOVERY RATE</span>
+              <span id="barFeePct" style="color:var(--neon-cyan)">0%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="barFeeFill" style="width:0%;"></div></div>
+          </div>
+          <div class="stat-card">
+            <div style="display:flex;justify-content:space-between;font-size:0.78rem;font-weight:700;">
+              <span>NET CASH SOLVENCY (CASH IN VS CASH OUT)</span>
+              <span id="barCashPct" style="color:#34d399">100%</span>
+            </div>
+            <div class="progress-track"><div class="progress-fill" id="barCashFill" style="width:100%;"></div></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Class-Wise Enrollment, Fee Breakdown & Bulk Class Challan Printer</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Class</th><th>Students</th><th>Boys / Girls</th><th>Paid Count</th>
+                  <th>Due Count</th><th>Monthly Billed (Rs)</th><th>Pending Dues (Rs)</th><th>Bulk Class Challans</th>
+                </tr>
+              </thead>
+              <tbody id="classSummaryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. FAMILY TREE PORTAL -->
+      <section id="view-family" class="view-section">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Father CNIC Lookup — Enter CNIC to View Whole Admitted Family</div></div>
+          <div class="filters">
+            <input type="text" id="cnicSearchInput" placeholder="Enter Father CNIC (e.g. 61101-1234567-1) or Father Name / Phone..." oninput="renderFamilySearch()" style="min-width:320px;font-weight:700;">
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('cnicSearchInput').value='';renderFamilySearch()">Show All Families</button>
+          </div>
+
+          <div id="selectedFamilyBox" style="display:none;background:rgba(0,242,254,0.06);border:1px solid var(--neon-cyan);border-radius:14px;padding:15px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px solid var(--glass-border);padding-bottom:10px;margin-bottom:12px;">
+              <div>
+                <div style="font-size:0.72rem;color:var(--neon-cyan);font-weight:700;">CONSOLIDATED FAMILY RECORD</div>
+                <h3 id="famHeaderTitle" style="color:#fff;margin:2px 0;">Father Name (CNIC)</h3>
+                <div id="famHeaderSub" style="font-size:0.84rem;color:#cbd5e1;">Phone & Address</div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button class="btn btn-wa" onclick="sendFamilyWhatsAppReminder()">Family Reminder</button>
+                <button class="btn btn-success" onclick="collectCombinedFamilyFee()">Receive Family Fee</button>
+                <button class="btn btn-primary" onclick="printTapsolFamilyChallan()">Print Tapsol 3-Copy Family Challan</button>
+                <button class="btn btn-outline" onclick="openStudentModalWithCNIC()">+ Admit Sibling</button>
+              </div>
+            </div>
+
+            <div class="stats-grid" style="margin-bottom:10px;">
+              <div class="stat-card"><div class="label">Admitted Children</div><div class="val" id="famChildCount">0</div></div>
+              <div class="stat-card"><div class="label">Family Monthly Fee</div><div class="val sensitive-val" id="famMonthlyFee">Rs 0</div></div>
+              <div class="stat-card"><div class="label">Family Total Paid</div><div class="val sensitive-val" id="famTotalPaid" style="color:#34d399">Rs 0</div></div>
+              <div class="stat-card"><div class="label">Combined Family Due</div><div class="val sensitive-val" id="famTotalDue" style="color:#fb7185">Rs 0</div></div>
+            </div>
+
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Photo</th><th>Roll No</th><th>Child Name</th><th>Class-Sec</th>
+                    <th>Monthly Fee</th><th>Arrears/Fine</th><th>Current Due</th><th>Status</th><th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="famChildrenBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Father CNIC</th><th>Father Name</th><th>Phone</th><th>Admitted Siblings</th>
+                  <th>Family Fee</th><th>Combined Due</th><th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="familyDirectoryBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. STUDENTS DIRECTORY -->
+      <section id="view-students" class="view-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Master Student Register (Photos, CNIC, ID Card, Leaving Certificate & CSV Import)</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <label class="btn btn-outline btn-sm" style="cursor:pointer;">
+                Import Excel (.CSV)
+                <input type="file" accept=".csv" style="display:none;" onchange="importStudentsCSV(event)">
+              </label>
+              <button class="btn btn-outline btn-sm" onclick="exportStudentsCSV()">Export Excel (.CSV)</button>
+              <button class="btn btn-primary btn-sm" onclick="openStudentModal()">+ New Admission</button>
+            </div>
+          </div>
+          <div class="filters">
+            <input type="text" id="stuSearch" placeholder="Search Roll No, Name, Father CNIC, Phone..." oninput="stuPage=1;renderStudents()" style="min-width:250px;">
+            <select id="stuClassFilter" onchange="stuPage=1;renderStudents()">
+              <option value="">All Classes</option>
+              <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+              <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+              <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option>
+            </select>
+            <select id="stuSecFilter" onchange="stuPage=1;renderStudents()">
+              <option value="">All Sections</option>
+              <option value="A">Sec A</option><option value="B">Sec B</option><option value="C">Sec C</option><option value="D">Sec D</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Photo</th><th>Roll No</th><th>Student Name</th><th>Father Name</th><th>Father CNIC</th>
+                  <th>Class-Sec</th><th>Phone</th><th>Fee</th><th>Due</th><th>Actions (ID / SLC / WhatsApp)</th>
+                </tr>
+              </thead>
+              <tbody id="stuTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span id="stuPageInfo">0 students</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-outline btn-sm" onclick="stuPage=Math.max(1,stuPage-1);renderStudents()">Prev</button>
+              <button class="btn btn-outline btn-sm" onclick="stuPage++;renderStudents()">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. FEE CHALLANS -->
+      <section id="view-fees" class="view-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">3-Copy Fee Challans, Bulk Class Challan Printer & POS Receipts</div>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;">
+              <button class="btn btn-primary btn-sm" onclick="bulkPrintFilteredChallans()">Bulk Print 3-Copy Challans (Selected Class)</button>
+              <button class="btn btn-warning btn-sm" onclick="billNewMonthAllStudents()">+ Bill New Month Fee to All</button>
+            </div>
+          </div>
+          <div class="filters">
+            <input type="text" id="feeSearch" placeholder="Search Roll No, Name, Father CNIC..." oninput="feePage=1;renderFees()" style="min-width:230px;">
+            <select id="feeClassFilter" onchange="feePage=1;renderFees()">
+              <option value="">Select Class (Or All)</option>
+              <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+              <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+              <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option>
+            </select>
+            <select id="feeStatusFilter" onchange="feePage=1;renderFees()">
+              <option value="">All Status</option>
+              <option value="Pending">Pending / Unpaid</option>
+              <option value="Partial">Partial</option>
+              <option value="Paid">Fully Paid</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Photo</th><th>Roll No</th><th>Student Name</th><th>Father CNIC</th><th>Class</th>
+                  <th>Tuition Fee</th><th>Balance Due</th><th>Status</th><th>Tapsol Challan / Receive / WhatsApp</th>
+                </tr>
+              </thead>
+              <tbody id="feeTableBody"></tbody>
+            </table>
+          </div>
+          <div class="pagination">
+            <span id="feePageInfo">0 accounts</span>
+            <div style="display:flex;gap:6px;">
+              <button class="btn btn-outline btn-sm" onclick="feePage=Math.max(1,feePage-1);renderFees()">Prev</button>
+              <button class="btn btn-outline btn-sm" onclick="feePage++;renderFees()">Next</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. CASH IN / CASH OUT LEDGER -->
+      <section id="view-cashbook" class="view-section">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="label">Filtered Cash In</div><div class="val sensitive-val" id="cbIn" style="color:#34d399">Rs 0</div></div>
+          <div class="stat-card"><div class="label">Filtered Cash Out (Expenses, Bills & Payroll)</div><div class="val sensitive-val" id="cbOut" style="color:#fb7185">Rs 0</div></div>
+          <div class="stat-card"><div class="label">Net Cash Balance</div><div class="val sensitive-val" id="cbNet">Rs 0</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Complete Cash In / Cash Out & Expenses Ledger</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-danger btn-sm" onclick="openCashModal('OUT')">- Record Expense (Cash Out)</button>
+              <button class="btn btn-success btn-sm" onclick="openCashModal('IN')">+ Record Income (Cash In)</button>
+              <button class="btn btn-outline btn-sm" onclick="exportCashbookCSV()">Export CSV</button>
+            </div>
+          </div>
+          <div class="filters">
+            <input type="text" id="cbSearch" placeholder="Search Voucher #, Description, CNIC..." oninput="renderCashbook()" style="min-width:250px;">
+            <select id="cbTypeFilter" onchange="renderCashbook()">
+              <option value="">All (Cash In & Cash Out)</option>
+              <option value="IN">Cash In Only (Fees / Income)</option>
+              <option value="OUT">Cash Out Only (Expenses, Bills & Salaries)</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Voucher #</th><th>Date</th><th>Type</th><th>Category</th><th>Description</th>
+                  <th>CNIC / Ref</th><th>Mode</th><th>Cash In (Rs)</th><th>Cash Out (Rs)</th><th>Receipt</th>
+                </tr>
+              </thead>
+              <tbody id="cashbookBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. STAFF PAYROLL -->
+      <section id="view-payroll" class="view-section">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="label">Total Active Staff</div><div class="val" id="stTotalCount">0</div></div>
+          <div class="stat-card"><div class="label">Monthly Payroll Budget</div><div class="val sensitive-val" id="stMonthlyBudget">Rs 0</div></div>
+          <div class="stat-card"><div class="label">Paid This Month</div><div class="val" id="stPaidCount" style="color:#34d399">0 Staff</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Teachers Login Credentials & Payroll</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-warning btn-sm" onclick="resetStaffPayrollMonth()">Start New Payroll Month</button>
+              <button class="btn btn-primary btn-sm" onclick="openStaffModal()">+ Add Teacher / Staff & Bank Info</button>
+            </div>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Emp ID</th><th>Teacher Name</th><th>Login Username</th><th>Bank Name & Account / IBAN</th>
+                  <th>Basic</th><th>Allow</th><th>Deduct</th><th>Net Salary</th><th>Status</th><th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="staffTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. TEACHER-ONLY PRIVATE SALARY PORTAL -->
+      <section id="view-teacherportal" class="view-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Teacher Lookup & Personal Bank Account Portal</div>
+          </div>
+          <div class="filters finance-only" id="adminTeacherSelectorWrap">
+            <label style="font-size:0.8rem;color:var(--neon-cyan);font-weight:700;">Inspect Teacher Portal Record:</label>
+            <select id="teacherPortalSelect" onchange="renderTeacherSelfPortal()"></select>
+          </div>
+          <div id="teacherPortalContent"></div>
+        </div>
+      </section>
+
+      <!-- 8. UTILITY BILLS TRACKER -->
+      <section id="view-utilities" class="view-section">
+        <div class="stats-grid">
+          <div class="stat-card"><div class="label">Electricity Bills</div><div class="val sensitive-val" id="uElecTotal">Rs 0</div></div>
+          <div class="stat-card"><div class="label">Sui Gas Bills</div><div class="val sensitive-val" id="uGasTotal">Rs 0</div></div>
+          <div class="stat-card"><div class="label">WiFi / Internet Bills</div><div class="val sensitive-val" id="uWifiTotal">Rs 0</div></div>
+          <div class="stat-card"><div class="label">Unpaid Utility Dues</div><div class="val sensitive-val" id="uUnpaidTotal" style="color:#fb7185">Rs 0</div></div>
+        </div>
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Campus Utility Bills Ledger (Electricity, Gas, PTCL/StormFiber WiFi, Water & Diesel)</div>
+            <button class="btn btn-primary btn-sm" onclick="openUtilityModal()">+ Add Utility Bill (Elec / Gas / WiFi)</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Bill Type</th><th>Provider / Meter</th><th>Reference / Consumer #</th><th>Billing Month</th>
+                  <th>Due Date</th><th>Bill Amount (Rs)</th><th>Status</th><th>Pay & Post to Cash Out</th>
+                </tr>
+              </thead>
+              <tbody id="utilityTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. ATTENDANCE -->
+      <section id="view-attendance" class="view-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Daily Class Attendance Register (With Absent WhatsApp Alert)</div>
+            <div style="display:flex;gap:8px;">
+              <button class="btn btn-outline btn-sm" onclick="markAllAtt('Present')">Mark All Present</button>
+              <button class="btn btn-success btn-sm" onclick="saveAttendance()">Save Attendance</button>
+            </div>
+          </div>
+          <div class="filters">
+            <input type="date" id="attDate" onchange="renderAttendance()">
+            <select id="attClass" onchange="renderAttendance()">
+              <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+              <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+              <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option>
+            </select>
+            <select id="attSec" onchange="renderAttendance()">
+              <option value="A">Sec A</option><option value="B">Sec B</option><option value="C">Sec C</option><option value="D">Sec D</option>
+            </select>
+            <span id="attBadge" class="badge bg-blue">Ready</span>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr><th>Photo</th><th>Roll No</th><th>Student Name</th><th>Father Name</th><th>Status</th><th>Remarks</th><th>WhatsApp Parent</th></tr>
+              </thead>
+              <tbody id="attTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. EXAMS -->
+      <section id="view-exams" class="view-section">
+        <div class="panel">
+          <div class="panel-header">
+            <div class="panel-title">Exam Marks & Printable Result Cards</div>
+            <button class="btn btn-success btn-sm" onclick="saveExamMarks()">Save Marks</button>
+          </div>
+          <div class="filters">
+            <select id="examClass" onchange="renderExams()">
+              <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+              <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+              <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option>
+            </select>
+            <select id="examSec" onchange="renderExams()">
+              <option value="A">Sec A</option><option value="B">Sec B</option><option value="C">Sec C</option><option value="D">Sec D</option>
+            </select>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Photo</th><th>Roll No</th><th>Student Name</th><th>Math (100)</th><th>Sci (100)</th>
+                  <th>Eng (100)</th><th>Urdu (100)</th><th>Total</th><th>%</th><th>Print</th>
+                </tr>
+              </thead>
+              <tbody id="examTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- 11. BACKUP, SECURITY AUDIT LOG & WIPE SECURITY -->
+      <section id="view-backup" class="view-section">
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Encrypted Database Backup, .BAT Launcher & Multi-Lock Wipe Security</div></div>
+          <p style="font-size:0.83rem;color:#cbd5e1;margin-bottom:14px;">
+            All records are stored locally. Wiping the database requires Principal Username + Password verification plus a mandatory confirmation phrase.
+          </p>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;">
+            <button class="btn btn-success" onclick="downloadBatLauncher()">Download 1-Click Windows Launcher (.BAT)</button>
+            <button class="btn btn-primary" onclick="downloadBackup()">Download Complete Backup (.JSON)</button>
+            <label class="btn btn-outline" style="cursor:pointer;">
+              Restore Backup (.JSON)
+              <input type="file" accept=".json" style="display:none;" onchange="restoreBackup(event)">
+            </label>
+            <button class="btn btn-danger" onclick="openWipeSecurityModal()">Protected Wipe All Data (Requires Principal Auth)</button>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header"><div class="panel-title">Security Activity Audit Trail (Logins, Password Resets & Financial Actions)</div></div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Timestamp</th><th>User / Role</th><th>Security Event / Action</th></tr></thead>
+              <tbody id="auditLogBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- MODAL A: SCHOOL BRANDING, BANK CHALLAN & NAMED LOGINS -->
+  <div class="modal-backdrop" id="brandingModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>School Branding, Logins & Linked Recovery Email / Phone</span>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('brandingModal')">X</button>
+      </div>
+      <div class="modal-body">
+        <div class="full form-group"><label>School Full Name *</label><input type="text" id="bSchoolName"></div>
+        <div class="form-group"><label>Campus Address & Phone</label><input type="text" id="bSchoolTagline"></div>
+        <div class="form-group"><label>Bank Name & Account # (On Tapsol Challan)</label><input type="text" id="bBankName"></div>
+        <div class="form-group"><label>Upload School Logo</label><input type="file" accept="image/*" onchange="handleSchoolLogoUpload(event)"></div>
+        <div class="form-group"><label>Upload School Building Background Pic</label><input type="file" accept="image/*" onchange="handleSchoolBgUpload(event)"></div>
+        <div class="form-group"><label>Principal Login Username *</label><input type="text" id="bAdminUser"></div>
+        <div class="form-group"><label>Principal Login Password *</label><input type="password" id="bAdminPass"></div>
+        <div class="form-group"><label>Cashier Login Username *</label><input type="text" id="bCashierUser"></div>
+        <div class="form-group"><label>Cashier Login Password *</label><input type="password" id="bCashierPass"></div>
+
+        <div class="full" style="border-top:1px solid var(--glass-border);padding-top:8px;margin-top:4px;">
+          <label style="color:var(--neon-cyan);font-size:0.78rem;font-weight:800;">LINKED SECURITY RECOVERY EMAIL & PHONE (FOR FORGOT PASSWORD OTP):</label>
+        </div>
+        <div class="form-group"><label>Linked Admin Recovery Email *</label><input type="email" id="bRecEmail" placeholder="principal@school.com"></div>
+        <div class="form-group"><label>Linked Admin WhatsApp / Phone *</label><input type="text" id="bRecPhone" placeholder="0300-1234567"></div>
+        <div class="form-group full"><label>Master Emergency Recovery Key *</label><input type="text" id="bMasterKey"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('brandingModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveBrandingSettings()">Save Credentials & Linked Recovery</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL B: STUDENT ADMISSION -->
+  <div class="modal-backdrop" id="stuModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Student Admission & Father CNIC Family Link</span>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('stuModal')">X</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="fStuId">
+        <div class="full" style="display:flex;align-items:center;gap:14px;background:rgba(255,255,255,0.04);padding:10px;border-radius:10px;">
+          <img id="fPicPreview" class="stu-pic-lg" src="" alt="Pic">
+          <div style="flex:1;">
+            <label style="font-size:0.78rem;font-weight:700;display:block;margin-bottom:4px;">Upload Student Passport Photo</label>
+            <input type="file" accept="image/*" onchange="handlePhotoUpload(event)" style="font-size:0.76rem;width:100%;">
+          </div>
+        </div>
+        <div class="full form-group" style="background:rgba(0,242,254,0.08);padding:10px;border-radius:10px;border:1px solid var(--neon-cyan);">
+          <label style="color:var(--neon-cyan);font-weight:700;">Father CNIC No * (Auto-Detects Admitted Siblings)</label>
+          <input type="text" id="fCnic" placeholder="61101-1234567-1" oninput="checkSiblingsByCNIC(this.value)">
+          <div id="siblingAlertBox" style="font-size:0.78rem;margin-top:4px;color:#34d399;font-weight:600;display:none;"></div>
+        </div>
+        <div class="form-group"><label>Roll No *</label><input type="text" id="fRoll"></div>
+        <div class="form-group"><label>Student Full Name *</label><input type="text" id="fName" oninput="updateAvatarPreview()"></div>
+        <div class="form-group"><label>Father Name *</label><input type="text" id="fFather"></div>
+        <div class="form-group"><label>Gender</label><select id="fGender"><option value="Male">Boy</option><option value="Female">Girl</option></select></div>
+        <div class="form-group">
+          <label>Class</label>
+          <select id="fClass">
+            <option value="1">Class 1</option><option value="2">Class 2</option><option value="3">Class 3</option>
+            <option value="4">Class 4</option><option value="5">Class 5</option><option value="6">Class 6</option>
+            <option value="7">Class 7</option><option value="8">Class 8</option><option value="9">Class 9</option><option value="10">Class 10</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Section</label><select id="fSec"><option value="A">Sec A</option><option value="B">Sec B</option><option value="C">Sec C</option><option value="D">Sec D</option></select></div>
+        <div class="form-group"><label>WhatsApp / Guardian Phone</label><input type="text" id="fPhone" placeholder="0300-1234567"></div>
+        <div class="form-group"><label>Home Address</label><input type="text" id="fAddress" placeholder="Sector G-9, Islamabad"></div>
+        <div class="form-group"><label>Monthly Tuition Fee (Rs)</label><input type="number" id="fFee" value="4000"></div>
+        <div class="form-group"><label>Current Payable Balance (Rs)</label><input type="number" id="fBalance" value="4000"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('stuModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL C: FEE PAYMENT -->
+  <div class="modal-backdrop" id="payModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Receive Fee Payment (Prints Tapsol POS Receipt)</span>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('payModal')">X</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="pStuId">
+        <div class="full" id="pStuBanner" style="display:flex;align-items:center;gap:12px;"></div>
+        <div class="form-group"><label>Billing Month</label><input type="text" id="pMonth" value="October 2026"></div>
+        <div class="form-group"><label>Payment Mode</label><select id="pMode"><option value="Cash Counter">Cash Counter</option><option value="Bank Challan">Bank Challan</option><option value="Online / EasyPaisa">Online / EasyPaisa</option></select></div>
+        <div class="form-group"><label>Current Due (Rs)</label><input type="number" id="pDue" readonly></div>
+        <div class="form-group"><label>Amount Receiving Now (Rs) *</label><input type="number" id="pAmount" style="font-weight:700;color:#34d399;"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('payModal')">Cancel</button>
+        <button class="btn btn-success" onclick="confirmStudentFee()">Post Fee & Print Tapsol Receipt</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL D: STAFF PAYROLL, BANK IBAN & TEACHER LOGIN CREDENTIALS -->
+  <div class="modal-backdrop" id="staffModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Add / Edit Teacher Payroll, Bank Account IBAN & Login Name</span>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('staffModal')">X</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="sId">
+        <div class="form-group"><label>Employee ID *</label><input type="text" id="sEmpNo" placeholder="EMP-101"></div>
+        <div class="form-group"><label>Teacher Full Name *</label><input type="text" id="sName" placeholder="Prof. Tariq Mahmood"></div>
+        <div class="form-group"><label>Designation *</label><input type="text" id="sRole" placeholder="Senior Science Teacher"></div>
+        <div class="form-group"><label>CNIC No</label><input type="text" id="sCnic" placeholder="61101-5554443-1"></div>
+        <div class="form-group"><label>Teacher Login Username * (For Salary Portal)</label><input type="text" id="sUser" placeholder="tariq_sci"></div>
+        <div class="form-group"><label>Teacher Login Password *</label><input type="text" id="sPass" placeholder="Assign teacher password"></div>
+        <div class="form-group"><label>Bank Name (HBL / Meezan / EasyPaisa)</label><input type="text" id="sBankName" placeholder="Meezan Bank"></div>
+        <div class="form-group"><label>Bank Account # / IBAN</label><input type="text" id="sBankAcc" placeholder="PK36MEZN000123456789"></div>
+        <div class="form-group"><label>Basic Salary (Rs) *</label><input type="number" id="sBasic" value="35000"></div>
+        <div class="form-group"><label>Allowances / Bonus (Rs)</label><input type="number" id="sAllow" value="3000"></div>
+        <div class="form-group"><label>Deductions / Advance (Rs)</label><input type="number" id="sDeduct" value="0"></div>
+        <div class="form-group"><label>Phone / WhatsApp</label><input type="text" id="sPhone" placeholder="0300-1234567"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('staffModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveStaffMember()">Save Teacher & Bank Details</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL E: ADD UTILITY BILL -->
+  <div class="modal-backdrop" id="utilModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Record Campus Utility Bill (Electricity, Sui Gas, WiFi, Water, Fuel)</span>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('utilModal')">X</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Utility Type *</label>
+          <select id="uType">
+            <option value="Electricity Bill">Electricity Bill (IESCO / WAPDA)</option>
+            <option value="Sui Gas Bill">Sui Gas Bill (SNGPL)</option>
+            <option value="WiFi / Internet Bill">WiFi / Fiber Internet (PTCL / Nayatel / StormFiber)</option>
+            <option value="Water & Filtration">Water & Filtration Plant Bill</option>
+            <option value="Generator Fuel">Standby Generator Diesel / Oil</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Provider / Meter Name</label><input type="text" id="uProvider" placeholder="IESCO Commercial Meter #1"></div>
+        <div class="form-group"><label>Consumer / Reference Number *</label><input type="text" id="uRef" placeholder="24-14112-0098123"></div>
+        <div class="form-group"><label>Billing Month</label><input type="text" id="uMonth" value="October 2026"></div>
+        <div class="form-group"><label>Due Date</label><input type="date" id="uDueDate"></div>
+        <div class="form-group"><label>Bill Amount (Rs) *</label><input type="number" id="uAmount" placeholder="45000"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('utilModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveUtilityBill()">Save Utility Bill</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL F: CASH IN / CASH OUT -->
+  <div class="modal-backdrop" id="cashModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span id="cashModalTitle">Record Cash Transaction</span>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('cashModal')">X</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label>Transaction Type</label>
+          <select id="cType" onchange="populateCashCategories()">
+            <option value="OUT">Cash Out (School Expense)</option>
+            <option value="IN">Cash In (Other Income)</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Date</label><input type="date" id="cDate"></div>
+        <div class="form-group"><label>Category</label><select id="cCategory"></select></div>
+        <div class="form-group"><label>Payment Mode</label><select id="cMode"><option value="Cash">Cash</option><option value="Bank Transfer">Bank Transfer</option></select></div>
+        <div class="form-group full"><label>Description *</label><input type="text" id="cTitle"></div>
+        <div class="form-group"><label>Amount (Rs) *</label><input type="number" id="cAmount"></div>
+        <div class="form-group"><label>Reference / CNIC</label><input type="text" id="cRef"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('cashModal')">Cancel</button>
+        <button class="btn btn-primary" onclick="saveCashTransaction()">Save Voucher</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL G: SCHOOL LEAVING CERTIFICATE (SLC) -->
+  <div class="modal-backdrop" id="slcModal">
+    <div class="modal">
+      <div class="modal-header">
+        <span>Issue School Leaving Certificate (SLC) & Character Certificate</span>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('slcModal')">X</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="slcStuId">
+        <div class="full" id="slcStuBanner" style="display:flex;align-items:center;gap:12px;"></div>
+        <div class="form-group">
+          <label>Certificate Type</label>
+          <select id="slcType">
+            <option value="SCHOOL LEAVING & CHARACTER CERTIFICATE">School Leaving Certificate (SLC)</option>
+            <option value="BONAFIDE & CHARACTER CERTIFICATE">Character & Bonafide Certificate</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Date of Admission</label><input type="date" id="slcAdmDate" value="2023-04-01"></div>
+        <div class="form-group"><label>Date of Leaving / Issue</label><input type="date" id="slcLeaveDate"></div>
+        <div class="form-group"><label>Conduct & Character</label><select id="slcConduct"><option value="Excellent & Exemplary">Excellent & Exemplary</option><option value="Very Good">Very Good</option></select></div>
+        <div class="form-group full"><label>Reason for Leaving</label><input type="text" id="slcReason" value="Promoted / Shifting residence with all school dues cleared."></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('slcModal')">Cancel</button>
+        <button class="btn btn-purple" onclick="printSLCCertificate()">Generate & Print Official Certificate</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL H: MULTI-LOCK WIPE SECURITY VERIFICATION -->
+  <div class="modal-backdrop" id="wipeModal">
+    <div class="modal" style="max-width:480px;border-color:var(--danger);">
+      <div class="modal-header" style="color:var(--danger);">
+        <span>CRITICAL SECURITY GATE — WIPE ALL SCHOOL DATA</span>
+        <button class="btn btn-outline btn-sm" onclick="closeModal('wipeModal')">X</button>
+      </div>
+      <div class="modal-body">
+        <div class="full" style="font-size:0.82rem;color:#cbd5e1;line-height:1.5;">
+          To permanently erase all students, cashbook entries, utility bills, and staff records, verify your Principal credentials and type <strong>CONFIRM-WIPE</strong> below:
+        </div>
+        <div class="form-group"><label>Principal Username *</label><input type="text" id="wAdminUser" autocomplete="off"></div>
+        <div class="form-group"><label>Principal Password *</label><input type="password" id="wAdminPass" autocomplete="off"></div>
+        <div class="form-group full"><label>Type "CONFIRM-WIPE" in Capital Letters *</label><input type="text" id="wPhrase" placeholder="CONFIRM-WIPE" autocomplete="off"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-outline" onclick="closeModal('wipeModal')">Abort</button>
+        <button class="btn btn-danger" onclick="executeProtectedWipe()">Verify & Permanently Wipe Database</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
