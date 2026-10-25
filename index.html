@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AURORA QUANTUM OS — School Management & ERP</title>
+  <title>EduCore Aurora School ERP</title>
+  <meta name="theme-color" content="#00f2fe">
+  <meta name="description" content="Complete Campus Management, Bank Payroll, 3-Copy Fee Challans & Utilities Software">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/png" href="icon-192.png">
+  <link rel="apple-touch-icon" href="icon-192.png">
   <link rel="stylesheet" href="style.css">
 </head>
 <body id="appBody">
@@ -896,6 +901,13 @@
     </div>
   </div>
 
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+  </script>
   <script src="app.js"></script>
 </body>
 </html>
